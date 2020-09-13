@@ -1,0 +1,260 @@
+---
+title: "Intro expresiones regulares"
+author: "Ana Diedrichs"
+date: "8/16/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+```
+
+## uso de str_view y str_view_all
+
+Para probar nuestras expresiones regulares sobre el conjunto de datos
+vamos a usar la función str_view y str_view_all
+
+Esta nos permite visualizar como funciona nuestra 
+expresión regular.
+
+
+## Al comienzo de la cadena
+
+
+```{r}
+str_view(c("abc", "def", "fgh","ana"), "^a")
+```
+
+
+```{r}
+str_detect(c("abc", "def", "fgh","ana"), "^a")
+```
+```{r}
+str_starts(c("abc", "def", "fgh","ana"),"a")
+```
+
+Ejercicio: detectar las palabras que empiecen con p
+
+```{r}
+fruit <- c("apple", "banana", "pear", "pinapple")
+
+str_detect(fruit, "^p")
+```
+
+## En el final de la cadena
+
+```{r}
+fruit <- c("apple", "banana", "pear", "pinapple")
+str_detect(fruit, "a$") # termina con a
+str_ends(fruit,"a") # regresa valores logicos, termina con a
+str_view(fruit,"a$") # visualizamos coincidencias
+```
+
+## Contains o en cualquier parte de la cadena 
+
+```{r}
+str_detect(fruit, "a")
+
+```
+```{r}
+# Show all matches with str_view_all
+str_view_all(c("abc", "def", "fgh"), "d|e")
+
+```
+
+
+con corchetes representamos un grupo de caracteres que 
+queremos que encuentre
+
+[ ]
+
+```{r}
+
+# Also vectorised over pattern
+str_detect("aecfg", letters)
+
+# Returns TRUE if the pattern do NOT match
+str_detect(fruit, "^p", negate = TRUE)
+```
+
+
+```{r}
+letters
+```
+
+
+## Que termine con
+
+## Dataset o Cadena Ejemplo
+
+```{r}
+datos = data.frame("nombre"=c("Analia Gomez", "Esteban Perez", "Sofia Schmidt", "David Rufo", "Celeste Casero"), 
+                       "edad"=c(23, 40, 20, NA, 22),
+                   "mail"=c("anag@company.com","estebanp@gmail","schmidt@yahoo",
+                            "deividrufo@hotmail","celestec@utn.edu.ar"))
+```
+
+```{r}
+tibble(datos)
+```
+
+```{r}
+str_detect(datos$mail,"@")
+```
+
+```{r}
+str_view_all(datos$mail,"edu")
+```
+
+```{r}
+str_starts(datos$nombre,"A")
+str_detect(datos$nombre,"^A")
+```
+
+Luego el patron lo podemos usar para filtrar en nuestro pipeline o
+flujo de trabajo de datos. ejemplo
+
+```{r}
+datos %>%
+  filter(str_starts(datos$nombre,"A"))
+```
+
+
+## llegare a hablar de esto 
+
+
+La siguiente expresión resalta la primera aparicion de una vocal en una palabra
+```{r}
+str_view(c("abc", "def", "fgh"), "[aeiou]")
+```
+
+
+
+```{r}
+
+str_view(c("444","444-5678","345-3333"), "[0-9]{3}-[0-9]{4}")
+```
+
+
+```{r}
+
+str_view(c("444","444-5678","345-33393"), "[0-9]{3}-[0-9]{4}")
+```
+
+```{r}
+
+str_view(c("444","444-5678","345-33393"), "[:digit:]{3}-[:digit:]{4}")
+```
+
+
+```{r}
+str_view(c("Ana","Ana ","Ana Laura"), "[:alpha:]*[:space:][A-Za-z]+")
+
+```
+
+Luego puedo usar el patron de arriba para realizar una expresion regular
+
+```{r}
+str_detect(c("Ana","Ana ","Ana Laura"), "[:alpha:]*[:space:][A-Za-z]+")
+```
+
+Revisar que una contrase;a tenga al menos 10 caracteres, al menos un n[umero], una mayuscula.
+
+```{r}
+passwords_example <- c("123456","c0ntRaSen1a","unodostres")
+
+```
+
+```{r}
+
+str_view(passwords_example,".*[:upper:|:digit:]+.*")
+```
+
+## dataset nombres 
+
+```{r}
+library(readr)
+nombres_2015 <- read_csv("https://infra.datos.gob.ar/catalog/otros/dataset/2/distribution/2.21/download/nombres-2015.csv")
+```
+
+```{r}
+head(nombres_2015)
+```
+
+```{r}
+glimpse(nombres_2015)
+```
+
+```{r}
+
+names <- nombres_2015 %>% 
+  select(nombre) %>% 
+  as.vector() 
+```
+
+Como es un dataset grande y puede demorar procesarse, seleccionamos al azar unas 1000 muestras.
+
+```{r}
+set.seed(100)
+nombres <- sample_n(names, 1000)
+```
+
+Nombres que contengan la silaba ana
+
+```{r}
+str_view_all(nombres$nombre,"ana",match = TRUE)
+```
+
+Nombres que tengan la letra b o B
+
+```{r}
+str_view_all(nombres$nombre,"B|b",match = TRUE)
+```
+
+Nombres que tengan la silaba ba
+
+```{r}
+str_view_all(nombres$nombre,"Ba|ba",match = TRUE)
+```
+
+Nombres que empiecen con B 
+
+```{r}
+str_view_all(nombres$nombre,"^B",match = TRUE)
+```
+
+Nombres que terminen con s  
+
+```{r}
+str_view_all(nombres$nombre,"s[:space:]",match = TRUE)
+```
+
+Nombres que terminen con z  
+
+```{r}
+str_view_all(nombres$nombre,"z[:space:]",match = TRUE)
+```
+
+Nombres que empiecen con B y luego tengan tres letras
+
+B_ _ _
+
+```{r}
+str_view_all(nombres$nombre,"^B[:alpha:]{3}[:space:]",match = TRUE)
+```
+
+Comentar expresion regular
+
+Quienes tienen tres nombres
+
+```{r}
+str_view_all(nombres$nombre,"[:alpha:]+[:space:][:alpha:]+[:space:][:alpha:]+",match = TRUE)
+```
+
+Resaltar o extraer el primer nombre
+
+```{r}
+str_view_all(nombres$nombre,"^[[:upper:]][^[:space:]]+",match = TRUE)
+```
+
