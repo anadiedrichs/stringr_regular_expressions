@@ -1,7 +1,10 @@
-# [EN] Download the dataset
-# [ES] Descarga el dataset
+# [EN] Load dataset
+# [ES] Carga el dataset
 library(readr)
-nombres_2015 <- read_csv("https://infra.datos.gob.ar/catalog/otros/dataset/2/distribution/2.21/download/nombres-2015.csv")
+library(dplyr)
+library(stringr)
+
+nombres_2015 <- read_csv("dataset_nombres.csv")
 
 # create a vector of names
 names <- nombres_2015 %>% 
@@ -14,7 +17,8 @@ names <- nombres_2015 %>%
 nrow(names)
 
 # Como es un dataset grande y puede demorar procesarse, 
-# seleccionamos al azar unas 1000 muestras.
+# puede usar una versión más pequeña como la siguiente.
+# Seleccionamos al azar unas 1000 muestras.
 set.seed(100)
 nombres <- sample_n(names, 1000) 
 
